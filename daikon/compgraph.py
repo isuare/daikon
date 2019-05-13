@@ -52,10 +52,14 @@ def define_computation_graph(source_vocab_size: int, target_vocab_size: int, bat
         decoder_outputs, decoder_final_state = tf.nn.dynamic_rnn(decoder_cell,
                                                                  decoder_inputs_embedded,
                                                                  initial_state=encoder_final_state,
-                                                                 dtype=tf.float32)
+     with tf.variable_scope("Test"):
+        test_cell = tf.contrib.rnn.LSTMCell(C.HIDDEN_SIZE)
+        i_state = test_cell.zero_state(batch_size, tf.float32)
+        test_outputs, _ = tf.nn.dynamic_rnn(test_cell, decoder_outputs, initial_state=i_state, dtype=tf.float32)
+
 
     with tf.variable_scope("Logits"):
-        decoder_logits = tf.contrib.layers.linear(decoder_outputs, target_vocab_size)
+        decoder_logits = tf.contrib.layers.linear(est_outputs, target_vocab_size)
 
     with tf.variable_scope("Loss"):
         one_hot_labels = tf.one_hot(decoder_targets, depth=target_vocab_size, dtype=tf.float32)
